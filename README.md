@@ -1,6 +1,5 @@
 # parseur_article
-Parseur et désambiguïsation entre un article indéfini et un pronom personnel (le, les) d'un texte en français.
-
+L3 S6 Ingénierie des langues (projet) - Parseur et désambiguïsation entre un article indéfini et un pronom personnel complément d'objet direct (le, la, les) d'un texte en français
 ***
 ### Run
 
