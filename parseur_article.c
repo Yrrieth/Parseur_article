@@ -2,30 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * Enlève espace et ponctuation du paramètre d'entrée
- */
-char* clarifie_string (char buffer[]) {
-	int i;
-	char* resultat = malloc(256 * sizeof(char));
-	int indexResultat = 0;
-	for (i = 0; i < strlen(buffer); i++) {
-		// Between A-Z || a-z
-		if ((buffer[i] >= 65 && buffer[i] <= 90) || (buffer[i] >= 97 && buffer[i] <= 122)) {
-			resultat[indexResultat++] = buffer[i];
-		}
-	}
-	return resultat;
-}
-
 int compare_mot (char buffer[]) {
 	int i, j;
 	int identique = 0;
 	char *mot[] = {"le", "Le", "la", "La", "les", "Les", "l", "L"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
-
-	//buffer = clarifie_string(buffer);
-	//printf("%s\n", buffer);
 
 	for (i = 0; i < nombreMaxMot; i++) {
 		if (strcmp(buffer, mot[i]) == 0) {
@@ -124,14 +105,11 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 	int identique;
 	int pron_suj;
 	
-	
-	
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
-		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || (c == '\'')) { // Si c'est une ponctuation == Fin de mot
+		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
+			c == '\t' || c == '\n') { // Si c'est une ponctuation == Fin de mot
 			indexCourant = 0;
 			identique = compare_mot(buffer);
-
-			//printf("%s\n", motPrecedent);
 
 			if (identique == 1) {
 				pron_suj = compare_pron_suj(motPrecedent);
@@ -183,7 +161,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 int main (int argc, char *argv[]){
 	if(argc < 3){
-		fprintf(stderr, "Il manque des arguments :\n./a.out fichier_a_parser.txt resultat.xml\n");
+		fprintf(stderr, "Il manque des arguments :\n./a.out texte_a_analyser.txt resultat.xml\n");
 		exit(1);
 	}
 	FILE* fichier_entree = NULL;
