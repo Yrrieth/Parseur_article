@@ -33,6 +33,37 @@ int compare_pron_suj (char buffer[]) {
 	return identique;
 }
 
+int compare_prepo_pron (char buffer[]) {
+	int i, j;
+	int identique = 0;
+	char *mot[] = {"de", "à"};
+	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
+	for (i = 0; i < nombreMaxMot; i++) {
+		if (strcmp(buffer, mot[i]) == 0) {
+			identique = 1;
+			return identique;
+		}
+	}
+	return identique;
+}
+
+
+int compare_prepo_articl (char buffer[]) {
+	int i, j;
+	int identique = 0;
+	char *mot[] = {"sur", "sous", "entre", "devant", "derrière", "dans", "chez",
+				   "avant", "après", "vers", "depuis", "pendant", "pour",
+				   "vers"};
+	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
+	for (i = 0; i < nombreMaxMot; i++) {
+		if (strcmp(buffer, mot[i]) == 0) {
+			identique = 1;
+			return identique;
+		}
+	}
+	return identique;
+}
+
 /*
 void lire (FILE* fichier_entree, FILE* fichier_a){
 	int c = 0;
@@ -104,6 +135,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 	// boolean
 	int identique;
 	int pron_suj;
+	int prepo_articl;
 	
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
 		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
@@ -113,8 +145,12 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 			if (identique == 1) {
 				pron_suj = compare_pron_suj(motPrecedent);
+				prepo_articl = compare_prepo_articl(motPrecedent);
+
 				if (pron_suj == 1) {
 					fprintf(fichier_a, "<pronom>");
+				} else if (prepo_articl == 1) {
+					fprintf(fichier_a, "<article>");
 				} else {
 					fprintf(fichier_a, "<trouve>");
 				}
@@ -124,6 +160,8 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 					if (pron_suj == 1) {
 						fprintf(fichier_a, "</pronom>");
+					} else if (prepo_articl == 1) {
+						fprintf(fichier_a, "</article>");
 					} else {
 						fprintf(fichier_a, "</trouve>");
 					}
@@ -135,6 +173,8 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 					if (pron_suj == 1) {
 						fprintf(fichier_a, "</pronom>%c", c);
+					} else if (prepo_articl == 1) {
+						fprintf(fichier_a, "</article>%c", c);
 					} else {
 						fprintf(fichier_a, "</trouve>%c", c);
 					}
@@ -175,7 +215,9 @@ int main (int argc, char *argv[]){
 	}
 
 	fprintf(fichier_sortie, "<?xml version=\"1.0\" encoding=\"utf-8\">\n");
+	fprintf(fichier_sortie, "<texte>\n");
 	lire(fichier_entree, fichier_sortie);
+	fprintf(fichier_sortie, "\n</texte>");
 	fclose(fichier_entree);
 	fclose(fichier_sortie);
 	return 0;
