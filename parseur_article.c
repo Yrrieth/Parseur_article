@@ -214,9 +214,12 @@ int main (int argc, char *argv[]){
 		exit(1);
 	}
 
-	fprintf(fichier_sortie, "<?xml version=\"1.0\" encoding=\"utf-8\">\n");
+	fprintf(fichier_sortie, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	fprintf(fichier_sortie, "<?xml-stylesheet href=\"res.xsl\" type=\"text/xsl\"?>\n");
 	fprintf(fichier_sortie, "<texte>\n");
+
 	lire(fichier_entree, fichier_sortie);
+
 	fprintf(fichier_sortie, "\n</texte>");
 	fclose(fichier_entree);
 	fclose(fichier_sortie);
