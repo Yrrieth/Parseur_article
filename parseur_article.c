@@ -75,13 +75,13 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 	char motPrecedent[taille]; // Stocke le mot précédant le buffer
 	char apostrophe[2];        // Stocke le caractère ' 
                                //(ici, fgetc retourne un entier qu'il faudra convertir en char grâce à sprintf() pour concaténer avec strcat(), voir plus bas)
-	char motSuivant[taille];   // Stocke le mot suivant le buffer
 
 	// boolean
 	int mot_identique;
 	int pron_suj;
 	int prepo_articl;
-	int bool_motSuiv;
+	int bool_motSuiv;  // Initialisé lorsqu'on trouve un mot identique,
+	                   // Puis, lors de la boucle suivante, stocke le buffer dans un fichier
 	
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
 		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
@@ -128,13 +128,14 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 						fprintf(fichier_a, "</trouve>%c", c);
 					}
 				}
-			} else {
+			} else { // Sinon, ce n'est pas un mot identique
 				fprintf(fichier_a, "%s%c", buffer, c);
 
-				if (bool_motSuiv == 1) {
+				// On stocke le mot qui suit le mot recherché dans un fichier
+				if (bool_motSuiv == 1) { // Si c'était un pronom
 					fprintf(fichier_pronom, "%s\n", buffer);
 					bool_motSuiv = 0;
-				} else if (bool_motSuiv == 2) {
+				} else if (bool_motSuiv == 2) { // Si c'était un article
 					fprintf(fichier_article, "%s\n", buffer);
 					bool_motSuiv = 0;
 				}
