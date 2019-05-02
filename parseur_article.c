@@ -64,7 +64,7 @@ int compare_prepo_articl (char buffer[]) {
 	return identique;
 }
 
-void lire (FILE* fichier_entree, FILE* fichier_a){
+void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* fichier_pronom){
 	// index
 	int c = 0;
 	int taille = 256;
@@ -72,14 +72,16 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 	// string
 	char buffer[taille];       // Stocke le mot actuel
-	char motPrecedent[taille]; // Stocke le mot précédent le buffer
+	char motPrecedent[taille]; // Stocke le mot précédant le buffer
 	char apostrophe[2];        // Stocke le caractère ' 
                                //(ici, fgetc retourne un entier qu'il faudra convertir en char grâce à sprintf() pour concaténer avec strcat(), voir plus bas)
+	char motSuivant[taille];   // Stocke le mot suivant le buffer
 
 	// boolean
 	int mot_identique;
 	int pron_suj;
 	int prepo_articl;
+	int bool_motSuiv;
 	
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
 		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
@@ -94,8 +96,10 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 
 				if (pron_suj == 1) {
 					fprintf(fichier_a, "<pronom>");
+					bool_motSuiv = 1;
 				} else if (prepo_articl == 1) {
 					fprintf(fichier_a, "<article>");
+					bool_motSuiv = 2;
 				} else {
 					fprintf(fichier_a, "<trouve>");
 				}
@@ -125,7 +129,15 @@ void lire (FILE* fichier_entree, FILE* fichier_a){
 					}
 				}
 			} else {
-				fprintf(fichier_a, "%s%c", buffer, c);	
+				fprintf(fichier_a, "%s%c", buffer, c);
+
+				if (bool_motSuiv == 1) {
+					fprintf(fichier_pronom, "%s\n", buffer);
+					bool_motSuiv = 0;
+				} else if (bool_motSuiv == 2) {
+					fprintf(fichier_article, "%s\n", buffer);
+					bool_motSuiv = 0;
+				}
 			}
 			memset(motPrecedent, 0, sizeof(motPrecedent)); // Pour effacer le contenu de motPrecedent
 			
@@ -156,8 +168,8 @@ int main (int argc, char *argv[]){
 
 	fichier_entree = fopen(argv[1], "r+");
 	fichier_sortie = fopen(argv[2], "w+");
-	fichier_article = fopen("fichier_article.txt", "a+");
-	fichier_pronom = fopen("fichier_pronom.txt", "a+");
+	fichier_article = fopen("fichier_article.txt", "w+");
+	fichier_pronom = fopen("fichier_pronom.txt", "w+");
 
 	if(fichier_entree == NULL || fichier_sortie == NULL || fichier_article == NULL || fichier_pronom == NULL){
 		fprintf(stderr, "bug à la lecture/création du fichier\n");
@@ -168,7 +180,7 @@ int main (int argc, char *argv[]){
 	fprintf(fichier_sortie, "<?xml-stylesheet href=\"res.xsl\" type=\"text/xsl\"?>\n");
 	fprintf(fichier_sortie, "<texte>\n");
 
-	lire(fichier_entree, fichier_sortie);
+	lire(fichier_entree, fichier_sortie, fichier_article, fichier_pronom);
 
 	fprintf(fichier_sortie, "\n</texte>");
 	fclose(fichier_entree);
