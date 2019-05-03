@@ -64,6 +64,20 @@ int compare_prepo_articl (char buffer[]) {
 	return identique;
 }
 
+void parse_fichier (FILE* fichier_dico, char buffer[]) {
+	int c;
+	int taille = 256;
+	char mot_fichier[taille];
+	while (fgets(mot_fichier, taille, fichier_dico) != NULL) {
+		mot_fichier[strlen(mot_fichier) - 1] = '\0';
+		if (strcmp(mot_fichier, buffer) == 0) {
+			//printf("%sICI\n", mot_fichier);
+			return;
+		}
+	}
+	fprintf(fichier_dico, "%s\n", buffer);
+}
+
 void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* fichier_pronom){
 	// index
 	int c = 0;
@@ -97,9 +111,13 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 				if (pron_suj == 1) {
 					fprintf(fichier_a, "<pronom>");
 					bool_motSuiv = 1;
+					
+					fichier_pronom = fopen("fichier_pronom.txt", "a+");
 				} else if (prepo_articl == 1) {
 					fprintf(fichier_a, "<article>");
 					bool_motSuiv = 2;
+
+					fichier_article = fopen("fichier_article.txt", "a+");
 				} else {
 					fprintf(fichier_a, "<trouve>");
 				}
@@ -133,12 +151,20 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 
 				// On stocke le mot qui suit le mot recherché dans un fichier
 				if (bool_motSuiv == 1) { // Si c'était un pronom
-					fprintf(fichier_pronom, "%s\n", buffer);
+					//fprintf(fichier_pronom, "%s\n", buffer);
+					parse_fichier(fichier_pronom, buffer);
 					bool_motSuiv = 0;
+
+					fclose(fichier_pronom);
 				} else if (bool_motSuiv == 2) { // Si c'était un article
-					fprintf(fichier_article, "%s\n", buffer);
+					//fprintf(fichier_article, "%s\n", buffer);
+					parse_fichier(fichier_article, buffer);
 					bool_motSuiv = 0;
+
+					fclose(fichier_article);
 				}
+				
+				
 			}
 			memset(motPrecedent, 0, sizeof(motPrecedent)); // Pour effacer le contenu de motPrecedent
 			
@@ -169,8 +195,8 @@ int main (int argc, char *argv[]){
 
 	fichier_entree = fopen(argv[1], "r+");
 	fichier_sortie = fopen(argv[2], "w+");
-	fichier_article = fopen("fichier_article.txt", "w+");
-	fichier_pronom = fopen("fichier_pronom.txt", "w+");
+	fichier_article = fopen("fichier_article.txt", "a+");
+	fichier_pronom = fopen("fichier_pronom.txt", "a+");
 
 	if(fichier_entree == NULL || fichier_sortie == NULL || fichier_article == NULL || fichier_pronom == NULL){
 		fprintf(stderr, "bug à la lecture/création du fichier\n");
@@ -186,5 +212,7 @@ int main (int argc, char *argv[]){
 	fprintf(fichier_sortie, "\n</texte>");
 	fclose(fichier_entree);
 	fclose(fichier_sortie);
+	//fclose(fichier_pronom);
+	//fclose(fichier_article);
 	return 0;
 }
