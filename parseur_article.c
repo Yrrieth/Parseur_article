@@ -33,7 +33,7 @@ int compare_pron_suj (char buffer[]) {
 	return identique;
 }
 
-int compare_prepo_pron (char buffer[]) {
+/*int compare_prepo_pron (char buffer[]) {
 	int i, j;
 	int identique = 0;
 	char *mot[] = {"de", "à"};
@@ -45,7 +45,7 @@ int compare_prepo_pron (char buffer[]) {
 		}
 	}
 	return identique;
-}
+}*/
 
 
 int compare_prepo_articl (char buffer[]) {
@@ -79,7 +79,7 @@ int lit_fichier_dico (FILE* fichier_dico, char buffer[]) {
 
 void cree_fichier_dico (FILE* fichier_dico, char buffer[]) {
 	int c;
-	int taille = 256;
+	int taille = 1024;
 	char mot_fichier[taille];
 	while (fgets(mot_fichier, taille, fichier_dico) != NULL) {
 		mot_fichier[strlen(mot_fichier) - 1] = '\0';
@@ -96,7 +96,6 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 	int taille = 256;
 	int indexCourant = 0; // index courant du buffer
 	int ponctuationPrecedente;
-
 
 	// string
 	char buffer[taille];       // Stocke le mot actuel
@@ -148,72 +147,75 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 					}
 				}
 
-				if (prem_lecture == 1) {
-					if (c == '\'') { // Dans le cas où c vaut l' ou L'
-						fprintf(fichier_a, "%s%c", buffer, c);
+				if (c == '\'') { // Dans le cas où c vaut l' ou L'
+					fprintf(fichier_a, "%s%c", buffer, c);
 
-						if (pron_suj == 1) {
-							fprintf(fichier_a, "</pronom>");
-						} else if (prepo_articl == 1) {
-							fprintf(fichier_a, "</article>");
-						} else {
-							fprintf(fichier_a, "</trouve>");
-						}
-
-						sprintf(apostrophe, "%d", c);  // int devient un char*
-						strcat(buffer, apostrophe);    // Concatène (l ou L) et '
+					if (pron_suj == 1) {
+						fprintf(fichier_a, "</pronom>");
+					} else if (prepo_articl == 1) {
+						fprintf(fichier_a, "</article>");
 					} else {
-						fprintf(fichier_a, "%s", buffer);
+						if (prem_lecture == 1) {
+							fprintf(fichier_a, "</trouve>");	
+						}
+					}
 
-						if (pron_suj == 1) {
-							fprintf(fichier_a, "</pronom>%c", c);
-						} else if (prepo_articl == 1) {
-							fprintf(fichier_a, "</article>%c", c);
-						} else {
+					sprintf(apostrophe, "%d", c);  // int devient un char*
+					strcat(buffer, apostrophe);    // Concatène (l ou L) et '
+				} else {
+					fprintf(fichier_a, "%s", buffer);
+
+					if (pron_suj == 1) {
+						fprintf(fichier_a, "</pronom>%c", c);
+					} else if (prepo_articl == 1) {
+						fprintf(fichier_a, "</article>%c", c);
+					} else {
+						if (prem_lecture == 1) {
 							fprintf(fichier_a, "</trouve>%c", c);
 						}
 					}
 				}
 			} else { // Sinon, ce n'est pas un mot identique
+				// On stocke le mot qui suit le mot recherché dans un fichier
+				if (bool_motSuiv == 1) { // Si c'était un pronom
+					//fprintf(fichier_pronom, "%s\n", buffer);
+					cree_fichier_dico(fichier_pronom, buffer);
+					bool_motSuiv = 0;
 
-				if (prem_lecture == 1) {
-					fprintf(fichier_a, "%s%c", buffer, c);
+					fclose(fichier_pronom);
+				} else if (bool_motSuiv == 2) { // Si c'était un article
+					//fprintf(fichier_article, "%s\n", buffer);
+					cree_fichier_dico(fichier_article, buffer);
+					bool_motSuiv = 0;
 
-					// On stocke le mot qui suit le mot recherché dans un fichier
-					if (bool_motSuiv == 1) { // Si c'était un pronom
-						//fprintf(fichier_pronom, "%s\n", buffer);
-						cree_fichier_dico(fichier_pronom, buffer);
-						bool_motSuiv = 0;
-
-						fclose(fichier_pronom);
-					} else if (bool_motSuiv == 2) { // Si c'était un article
-						//fprintf(fichier_article, "%s\n", buffer);
-						cree_fichier_dico(fichier_article, buffer);
-						bool_motSuiv = 0;
-
-						fclose(fichier_article);
-					}
-				}  else if (prem_lecture == 0) {
-					//printf("%s\n", motPrecedent);
+					fclose(fichier_article);
+				}
+				if (prem_lecture == 0) {
 					if (compare_mot(motPrecedent) == 1 && bool_motPrecedent == 1) {
-						if (&ponctuationPrecedente == NULL) {
-							ponctuationPrecedente = ' ';
-							printf("BLABLA\n");
-						}
 						
 						fichier_pronom = fopen("fichier_pronom.txt", "a+");
 						fichier_article = fopen("fichier_article.txt", "a+");
+						//perror("fopen:");
 
 						if (lit_fichier_dico(fichier_pronom, buffer) == 1) {
 							fprintf(fichier_a, "<pronom>%s</pronom>%c", motPrecedent, ponctuationPrecedente);
 							fprintf(fichier_a, "%s%c", buffer, c);
+							/*fprintf(fichier_a, "<pronom>");
+							fprintf(fichier_a, "%s", motPrecedent);
+							fprintf(fichier_a, "</pronom>");
+							fprintf(fichier_a, "%c", ponctuationPrecedente);
+							fprintf(fichier_a, "%s%c", buffer, c);*/
+							
 						} else if (lit_fichier_dico(fichier_article, buffer) == 1) {
 							fprintf(fichier_a, "<article>%s</article>%c", motPrecedent, ponctuationPrecedente);
 							fprintf(fichier_a, "%s%c", buffer, c);
+
 						} else {
 							fprintf(fichier_a, "<trouve>%s</trouve>%c", motPrecedent, ponctuationPrecedente);
 							fprintf(fichier_a, "%s%c", buffer, c);
 						}
+						fclose(fichier_pronom);
+						fclose(fichier_article);
 						bool_motPrecedent = 0;
 					} else {
 						fprintf(fichier_a, "%s%c", buffer, c);
