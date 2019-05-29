@@ -2,64 +2,71 @@
 #include <stdlib.h>
 #include <string.h>
 
+char* convertis_prem_lettre_en_maj (char mot[]) {
+	int taille = 256;
+	char* motEnMaj = malloc(taille * sizeof(char));
+	strcpy(motEnMaj,mot);
+	motEnMaj[0] = mot[0] - 32;  // 32, car il y a une différence de 32 symboles dans le tableau ASCII
+	                            // pour obtenir la même lettre en majuscule
+	return motEnMaj;
+}
+
 int compare_mot (char buffer[]) {
 	int i, j;
+	int taille = 256;
+	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
-	char *mot[] = {"le", "Le", "la", "La", "les", "Les", "l", "L"};
+	char *mot[] = {"le", "la", "les", "l"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
 
 	for (i = 0; i < nombreMaxMot; i++) {
-		if (strcmp(buffer, mot[i]) == 0) {
+		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
+		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
 			return identique;
 		}
+		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
 	return identique;
 }
 
 int compare_pron_suj (char buffer[]) {
 	int i, j;
+	int taille = 256;
+	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
 	char *mot[] = {"je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles",
-				   "Je", "Tu", "Il", "Elle", "On", "Nous", "Vous", "Ils", "Elles",
-				   "me", "te", "se", "J", "j"};
+				   "me", "te", "se", "j"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
+
 	for (i = 0; i < nombreMaxMot; i++) {
-		if (strcmp(buffer, mot[i]) == 0) {
+		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
+		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
 			return identique;
 		}
+		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
 	return identique;
 }
 
-/*int compare_prepo_pron (char buffer[]) {
-	int i, j;
-	int identique = 0;
-	char *mot[] = {"de", "à"};
-	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
-	for (i = 0; i < nombreMaxMot; i++) {
-		if (strcmp(buffer, mot[i]) == 0) {
-			identique = 1;
-			return identique;
-		}
-	}
-	return identique;
-}*/
-
-
 int compare_prepo_articl (char buffer[]) {
 	int i, j;
+	int taille = 256;
+	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
 	char *mot[] = {"sur", "sous", "entre", "devant", "derrière", "dans", "chez",
 				   "avant", "après", "vers", "depuis", "pendant", "pour",
 				   "vers", "tout", "toute", "tous", "toutes"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
+
 	for (i = 0; i < nombreMaxMot; i++) {
-		if (strcmp(buffer, mot[i]) == 0) {
+		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
+		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
 			return identique;
 		}
+		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
 	return identique;
 }
@@ -95,7 +102,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 	int c = 0;
 	int taille = 256;
 	int indexCourant = 0; // index courant du buffer
-	int ponctuationPrecedente;
+	int ponctuationPrecedente = 0;
 
 	// string
 	char buffer[taille];       // Stocke le mot actuel
@@ -119,7 +126,6 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 	}
 
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
-
 		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
 			c == ';' || c == '-' || c == '\t' || c == '\n') { // Si c'est une ponctuation == Fin de mot
 			indexCourant = 0;
