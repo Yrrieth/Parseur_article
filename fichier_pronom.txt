@@ -1,7 +1,6 @@
 aimait
 vénérait
 a
-crois
 donnait
 nommerons
 ai
@@ -38,7 +37,6 @@ avouer
 aurez
 trouvez
 questionna
-gênais
 eût
 laissons
 répétons
@@ -46,10 +44,8 @@ fasse
 vît
 entendaient
 regardait
-uns
 examina
 figurer
-voyez
 répéta
 avait
 connaissons
@@ -77,7 +73,6 @@ accable
 leur
 représente
 croit
-idolâtres
 déteste
 entend
 mangerai_
@@ -115,7 +110,6 @@ considéra
 regarderai
 attends
 faut
-croyais
 cherchait
 reconnaissiez
 revoit
@@ -130,7 +124,6 @@ reposa
 montra
 ferez
 soutiendrez
-cheval
 acheter
 garantir
 dit
@@ -141,7 +134,6 @@ comprit
 était
 gênait
 y
-droit
 atteins
 recracha
 rouvrait
@@ -152,9 +144,7 @@ reproche
 entendait
 omettions
 remplaçait
-arrangez
 louerais
-selle
 conduisit
 servit
 prévînt
@@ -167,12 +157,10 @@ déplia
 poursuivait
 geste
 engagea
-forçat
 ignore
 soupçonne
 espère
 interrompit
-voir
 voie
 petit
 amènerai
@@ -184,7 +172,6 @@ verrez
 entends
 ferai
 transfère
-transférer
 prenait
 attendait
 disait
