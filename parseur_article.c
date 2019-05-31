@@ -38,7 +38,7 @@ int compare_pron_suj (char buffer[]) {
 	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
 	char *mot[] = {"je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles",
-				   "me", "te", "se", "j", "ne"};
+				   "me", "te", "se", "j", "ne", "qui", "chacun"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
 
 	for (i = 0; i < nombreMaxMot; i++) {
@@ -62,7 +62,8 @@ int compare_prepo_articl (char buffer[]) {
 	char *mot[] = {"sur", "sous", "entre", "devant", "derrière", "dans", "chez",
 				   "avant", "après", "vers", "depuis", "pendant", "pour", "entre", "contre",
 				   "vers", "tout", "toute", "tous", "toutes", "avec", "par", "parmi",
-				   "dessous", "dessus",
+				   "dessous", "dessus", "que", "duquel", "desquels", "desquelles", 
+				   "auquel", "auxquels", "auxquelles", "lequel", "laquelle", "lesquels", "lesquelles",
 				   // Gentillé, ex: "Monsieur le maire"
 				   "monsieur", "m", "madame", "mme", "mademoiselle", "mlle"
 				   };
@@ -102,6 +103,13 @@ int compare_lexique_nominal (char buffer[]) {
 	free(motEnMaj);
 	return identique;
 }
+
+/*
+char *pronom_possesif[] = {"mien", "mienne", "tien", "tienne", "sien", "sienne",
+						   "miens", "miennes", "tiens", "tiennes", "siens", "siennes",
+						   "nôtre", "nôtres", "vôtre", "vôtres", "leur", "leurs"
+						  };
+*/
 
 int compare_mot_fichier_dico (FILE* fichier_dico, char buffer[]) {
 	int c;
@@ -161,7 +169,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 
 	while((c = fgetc(fichier_entree)) != EOF) { // Boucle sur chaque caractère du texte
 		if (c == ',' || c == '.' || c == '!' || c == '?' || c == ' ' || c == '\'' ||
-			c == ';' || c == '\t' || c == '\n') { // Si c'est une ponctuation == Fin de mot
+			c == ';' || c == '_' || c == '\t' || c == '\n') { // Si c'est une ponctuation == Fin de mot
 			indexCourant = 0;
 			mot_identique = compare_mot(buffer);
 
@@ -179,7 +187,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 					bool_motPrecedent = 0;
 				} else {
 					if (prem_lecture == 1) {
-						fprintf(fichier_a, "<trouve>&lt;indeter");
+						fprintf(fichier_a, "<trouve>&lt;idt");
 					} else if (prem_lecture == 0) {
 						bool_motPrecedent = 1;
 					}
@@ -198,7 +206,7 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 						if (prem_lecture == 1) {
 							fprintf(fichier_a, "&gt;");
 							fprintf(fichier_a, "%s%c", buffer, c);
-							fprintf(fichier_a, "&lt;indeter&gt;</trouve>");	
+							fprintf(fichier_a, "&lt;idt&gt;</trouve>");	
 						}
 					}
 				} else {
@@ -214,12 +222,13 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 						if (prem_lecture == 1) {
 							fprintf(fichier_a, "&gt;");
 							fprintf(fichier_a, "%s", buffer);
-							fprintf(fichier_a, "&lt;indeter&gt;</trouve>%c", c);
+							fprintf(fichier_a, "&lt;idt&gt;</trouve>%c", c);
 						}
 					}
 				}
-			} else if (compare_lexique_nominal(buffer) == 1) { // Sinon, si un c'est un article
+			} else if (compare_lexique_nominal(buffer) == 1 && prem_lecture == 1) { // Sinon, si un c'est un article
 				bool_motSuiv = 2;
+				fprintf(fichier_a, "%s%c", buffer, c);
 			} else { // Sinon, ce n'est pas un mot identique
 
 				if (prem_lecture == 1) {  // Première lecture
@@ -264,9 +273,9 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 
 						} else {
 							if (ponctuationPrecedente == '\'') {
-								fprintf(fichier_a, "<trouve>&lt;indeter&gt;%s%c&lt;/indeter&gt;</trouve>", motPrecedent, ponctuationPrecedente);	
+								fprintf(fichier_a, "<trouve>&lt;idt&gt;%s%c&lt;/idt&gt;</trouve>", motPrecedent, ponctuationPrecedente);	
 							} else {
-								fprintf(fichier_a, "<trouve>&lt;indeter&gt;%s&lt;/indeter&gt;</trouve>%c", motPrecedent, ponctuationPrecedente);	
+								fprintf(fichier_a, "<trouve>&lt;idt&gt;%s&lt;/idt&gt;</trouve>%c", motPrecedent, ponctuationPrecedente);	
 							}
 							fprintf(fichier_a, "%s%c", buffer, c);
 						}
