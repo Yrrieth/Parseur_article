@@ -23,10 +23,12 @@ int compare_mot (char buffer[]) {
 		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
 		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
+			free(motEnMaj);
 			return identique;
 		}
 		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
+	free(motEnMaj);
 	return identique;
 }
 
@@ -36,17 +38,19 @@ int compare_pron_suj (char buffer[]) {
 	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
 	char *mot[] = {"je", "tu", "il", "elle", "on", "nous", "vous", "ils", "elles",
-				   "me", "te", "se", "j"};
+				   "me", "te", "se", "j", "ne"};
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
 
 	for (i = 0; i < nombreMaxMot; i++) {
 		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
 		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
+			free(motEnMaj);
 			return identique;
 		}
 		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
+	free(motEnMaj);
 	return identique;
 }
 
@@ -56,18 +60,46 @@ int compare_prepo_articl (char buffer[]) {
 	char* motEnMaj = malloc(taille * sizeof(char));
 	int identique = 0;
 	char *mot[] = {"sur", "sous", "entre", "devant", "derrière", "dans", "chez",
-				   "avant", "après", "vers", "depuis", "pendant", "pour",
-				   "vers", "tout", "toute", "tous", "toutes"};
+				   "avant", "après", "vers", "depuis", "pendant", "pour", "entre", "contre",
+				   "vers", "tout", "toute", "tous", "toutes", "avec", "par", "parmi",
+				   "dessous", "dessus",
+				   // Gentillé, ex: "Monsieur le maire"
+				   "monsieur", "m", "madame", "mme", "mademoiselle", "mlle"
+				   };
 	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
 
 	for (i = 0; i < nombreMaxMot; i++) {
 		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
 		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
 			identique = 1;
+			free(motEnMaj);
 			return identique;
 		}
 		memset(motEnMaj, 0, sizeof(motEnMaj));
 	}
+	free(motEnMaj);
+	return identique;
+}
+
+int compare_lexique_nominal (char buffer[]) {
+	int i, j;
+	int taille = 256;
+	char* motEnMaj = malloc(taille * sizeof(char));
+	int identique = 0;
+	char *mot[] = {"un", "une", "du", "des", "quel", "quelle", "quels", "au", "aux"
+				  };
+	int nombreMaxMot = sizeof(mot)/sizeof(mot[0]);
+
+	for (i = 0; i < nombreMaxMot; i++) {
+		motEnMaj = convertis_prem_lettre_en_maj(mot[i]);
+		if (strcmp(buffer, mot[i]) == 0 || strcmp(buffer, motEnMaj) == 0) {
+			identique = 1;
+			free(motEnMaj);
+			return identique;
+		}
+		memset(motEnMaj, 0, sizeof(motEnMaj));
+	}
+	free(motEnMaj);
 	return identique;
 }
 
@@ -186,22 +218,25 @@ void lire (FILE* fichier_entree, FILE* fichier_a, FILE* fichier_article, FILE* f
 						}
 					}
 				}
+			} else if (compare_lexique_nominal(buffer) == 1) { // Sinon, si un c'est un article
+				bool_motSuiv = 2;
 			} else { // Sinon, ce n'est pas un mot identique
-				// On stocke le mot qui suit le mot recherché dans un fichier/dico
-				if (bool_motSuiv == 1) { // Si c'était un pronom
-					fseek(fichier_pronom, 0, SEEK_SET);
-					ecrit_dans_fichier_dico(fichier_pronom, buffer);
-					bool_motSuiv = 0;
 
-				} else if (bool_motSuiv == 2) { // Si c'était un article
-					fseek(fichier_article, 0, SEEK_SET);
-					ecrit_dans_fichier_dico(fichier_article, buffer);
-					bool_motSuiv = 0;
-				}
 				if (prem_lecture == 1) {  // Première lecture
+					// On stocke le mot qui suit le mot recherché dans un fichier/dico
+					if (bool_motSuiv == 1) { // Si c'était un pronom
+						fseek(fichier_pronom, 0, SEEK_SET);
+						ecrit_dans_fichier_dico(fichier_pronom, buffer);
+						bool_motSuiv = 0;
+
+					} else if (bool_motSuiv == 2) { // Si c'était un article
+						fseek(fichier_article, 0, SEEK_SET);
+						ecrit_dans_fichier_dico(fichier_article, buffer);
+						bool_motSuiv = 0;
+					}
+
 					fprintf(fichier_a, "%s%c", buffer, c);
-				}
-				if (prem_lecture == 0) {  // Seconde lecture
+				} else if (prem_lecture == 0) {  // Seconde lecture
 					// Lorsque le mot précédent est l'un des mots que l'on cherche (motPrecedent)
 					// et que ce mot a été balisé comme un cas indeterminé (bool_motPrecedent)
 					//printf("%s %s %d\n", motPrecedent, buffer, bool_motPrecedent);
@@ -291,17 +326,16 @@ int main (int argc, char *argv[]){
 		fprintf(stderr, "bug à la lecture/création du fichier\n");
 		exit(1);
 	}
-	printf("Première lecture\n");
+	printf("Première lecture, création du dictionnaire en cours...\n");
 
 	int prem_lecture = 1;
 
 	cree_fichier_xml(fichier_entree, fichier_sortie, fichier_article, fichier_pronom, prem_lecture);
-	//fseek(fichier_sortie, 0, SEEK_SET);
 	fclose(fichier_sortie);
 
 	int rm = remove(argv[2]);
 	if (rm == 0) {
-		printf("Fichier supprimé avec succès\n");
+		printf("Fichier supprimé avec succès.\n");
 	} else {
 		fprintf(stderr, "bug à la suppression du fichier\n");
 		exit(1);
@@ -312,11 +346,11 @@ int main (int argc, char *argv[]){
 		fprintf(stderr, "bug à la lecture/création du fichier\n");
 		exit(1);
 	} 
-	printf("Seconde lecture\n");
+	printf("Seconde lecture, balisage en cours...\n");
 	prem_lecture = 0;
 	cree_fichier_xml(fichier_entree, fichier_sortie, fichier_article, fichier_pronom, prem_lecture);
 
-	printf("Lecture terminée\n");
+	printf("Lecture terminée.\n");
 	fclose(fichier_entree);
 	fclose(fichier_sortie);
 	fclose(fichier_pronom);
